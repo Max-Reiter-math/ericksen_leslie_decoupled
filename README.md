@@ -40,41 +40,38 @@ python sim.py -m decoupled_fp_solver -e annihilation_2 -s "simple" -d 3 -dt 0.01
 [//]: # "type tree /F into windows terminal"
 
 ```bash
-│   lib.py
-│   README.md
-│   run_experiment.py
-│   sim.py
-│   sim_multi.py
-│   sim_viewer.py
-│   __init__.py
-│
-├───accessories
-│       logger.py
-│       my_plots.py
-│       postprocess.py
-│       __init__.py
-│
-├───experiments
-│       annihilation_2.py
-│       smooth_2d.py
-│       velocity_driven_flow_2.py
-│       __init__.py
-│
-└───model_library
-    │   coupled_fp_solver.py
-    │   decoupled_fp_solver.py
-    │   linear_coupled_orth_projection_model.py
-    │   __init__.py
-    │
-    └───basic_models
-            assist_funcs.py
-            basemodel.py
-            basemodel_fp.py
-            basemodel_linear_coupled.py
-            basemodel_linear_decoupled.py
-            basemodel_linear_fp_coupled.py
-            basemodel_linear_fp_decoupled.py
-            __init__.py
+├── CITATION.cff
+├── README.md
+├── __init__.py
+├── accessories
+│   ├── __init__.py
+│   ├── communicate.py
+│   ├── logger.py
+│   ├── my_plots.py
+│   └── postprocess.py
+├── example_config.json
+├── experiments
+│   ├── __init__.py
+│   ├── annihilation_2.py
+│   ├── smooth_2d.py
+│   └── velocity_driven_flow_2.py
+├── lib.py
+├── model_library
+│   ├── __init__.py
+│   ├── basic_models
+│   │   ├── __init__.py
+│   │   ├── assist_funcs.py
+│   │   ├── basemodel.py
+│   │   ├── basemodel_fp.py
+│   │   ├── basemodel_linear_decoupled.py
+│   │   ├── basemodel_linear_decoupled_chorin.py
+│   │   ├── basemodel_linear_fp_decoupled.py
+│   │   └── basemodel_linear_fp_decoupled_chorin.py
+│   ├── decoupled_fp_solver.py
+│   └── decoupled_fp_solver_chorin.py
+├── run_experiment.py
+├── sim.py
+└── telebot_config.json
 ```
 
 ## Citation
