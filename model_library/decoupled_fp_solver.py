@@ -59,12 +59,13 @@ class decoupled_fp_solver(basemodel_linear_fp_decoupled):
         (vl,pl)=self.ul.split(deepcopy=True)
         (vl0,pl0)=self.ul0.split(deepcopy=True)
 
-        e_v = vl.vector()[:]-vl0.vector()[:]
-        e_d = self.dl.vector()[:]-self.dl0.vector()[:]
         e_q = self.ql.vector()[:]-self.ql0.vector()[:]
-        
-        self.fp_err_list = [np.max(np.abs(e_v)), np.max(np.abs(e_d)) ,np.max(np.abs(e_q))]
-        self.fp_err = np.max(self.fp_err_list)    
+        e_q = np.max(np.abs(e_q))
+        e_v = np.sqrt(assemble((vl-vl0)**2*dx))
+        e_d = np.sqrt(assemble((self.dl-self.dl0)**2*dx + grad(self.dl-self.dl0)**2*dx))
+       
+        self.fp_err_list = [e_v, e_d ,e_q]
+        self.fp_err = e_v + e_d
 
     def get_model_dependent_log(self):
         """
