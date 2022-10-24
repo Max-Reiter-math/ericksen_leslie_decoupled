@@ -4,7 +4,7 @@ authors:
   - family-names: Reiter
     given-names: Maximilian
     orcid: https://orcid.org/0000-0001-9137-7978 
-title: "FEniCS implementation of a decoupled numerical FEM scheme for the Ericksen-Leslie Equations equipped with Dirichlet Energy"
+title: "FEniCS implementation of a decoupled numerical Finite Element scheme for the Ericksen-Leslie Equations equipped with the Dirichlet Energy"
 version: 1.1.0
 doi: 
-date-released: 19-10-2022
+date-released: 21-10-2022

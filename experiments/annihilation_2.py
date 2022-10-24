@@ -36,7 +36,7 @@ class annihilation_2:
         # - initial conditions
         self.ics = [zero_expr,Constant(0.0),d0_expr(),zero_expr]
         # boundary conditions
-        self.bcs = [zero_expr, Constant(0.0), bc_expr,None]
+        self.bcs = [zero_expr, Constant(0.0), bc_expr,zero_expr]
     
 def boundary_3d(x):
         return x[0] < (DOLFIN_EPS -0.5) or x[0] > (0.5 - DOLFIN_EPS) or x[1] < (DOLFIN_EPS -0.5) or x[1] > (0.5 - DOLFIN_EPS) or x[2] < (DOLFIN_EPS -0.5) or x[2] > (0.5 - DOLFIN_EPS)  
@@ -46,7 +46,6 @@ def boundary_2d(x):
 
 class d0_expr_3d(UserExpression):
     # - define custom Expression
-    # see https://fenicsproject.discourse.group/t/problem-defining-initial-conditions-expression-problem/626
     def eval(self,values,x):
         if x[1]==0 and (x[0]==0.25 or x[0]==-0.25):
             values[0]=0.0
@@ -65,7 +64,6 @@ class d0_expr_3d(UserExpression):
 
 class d0_expr_2d(UserExpression):
     # - define custom Expression
-    # see https://fenicsproject.discourse.group/t/problem-defining-initial-conditions-expression-problem/626
     def eval(self,values,x):
         eta = 0.05
         values[0]=pow(x[0],2)+pow(x[1],2)-0.25

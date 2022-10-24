@@ -77,8 +77,6 @@ def run_experiment(exp, mod, submodel, path="../", path_bias="", silent=False, *
             model.t += model.dt
             if not silent: print("Starting time-step ", model.t)
             (iteration, fp_errs)=model.do_time_step()
-            # evtl. use time step control
-            if timectrl: model.update_time_step_size()
             
             # - logging errors
             log_dict = {"time": model.t , "iterations": iteration ,  "fp_err":dict(zip(["v","d","q"], fp_errs)) , "processing_time": model.computation_time }
@@ -98,6 +96,7 @@ def run_experiment(exp, mod, submodel, path="../", path_bias="", silent=False, *
                 postprocess_d.save(dl,experiment.mesh, model.t, send_bot=send_bot)
                 
                 time_arr.append(model.t)
+                print("energy: ", model.energy)
                 Energies.append(model.energy)
                 energy_plot(time_arr, Energies,model.energy_labels,["-","-.","-."], path)
                 if bot!=None and (np.abs(model.t % (model.T/bot.photo_freq))< np.maximum(save_freq,model.dt)): 
@@ -114,46 +113,3 @@ def run_experiment(exp, mod, submodel, path="../", path_bias="", silent=False, *
         param_log.save(path)
       
     logs.save_all()
-
-
-def run_multiple_experiments(cluster, sim_list, path="../", no_of_threads=1, silent=False):
-    """
-    The run_id gives all simulations the same characters in the beginning of the folder name for easier comparison.
-    """
-    if not silent: print("no of threads selected for parallel simulations: ", no_of_threads)
-    tasks=[]
-    threadlist=[]
-    editing_thread = 0
-    run_id = 1
-    for (exp, mod, submodel, kwargs) in sim_list:
-        
-        # if not silent: print("loading experiment...")
-        # exp = e(dim=dim, dt=dt, n=dh)
-        # if test_run == True: 
-        #     exp.T=2*dt
-        # if not silent: print("initializing experiment setting...", exp.name, " for model ", model.modelname)
-        # model.init_experiment(exp)
-        # s="running: "+", ".join([model.modelname, exp.name,"dt", str(dt), "dh", str(dh)])
-        # print(s)
-        t=partial(run_experiment, exp, mod, submodel,path=path, path_bias=str(cluster+"_run"+str(run_id)), silent = silent, **kwargs)
-        
-        threadlist.append(threading.Thread(target=t))
-        print("task to threadlist added...")
-        # mod no_of_threads
-        print("current thread ", editing_thread)
-        if editing_thread==(no_of_threads-1):
-            for threadinstance in threadlist:
-                print("starting thread...")
-                threadinstance.start()
-            for threadinstance in threadlist:
-                print("waiting for thread...")
-                threadinstance.join()
-            threadlist=[]
-            editing_thread=-1
-            try: 
-                summary(cluster)
-            except:
-                print("Warning: summary can currently not be accessed...")
-        tasks.append((t,"test"))
-        run_id+=1
-        editing_thread+=1

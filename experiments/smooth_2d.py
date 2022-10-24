@@ -8,7 +8,6 @@ import numpy as np
 
 class smooth_2d:
     # as experiment one but in 2D
-    # as in Becker et. al
     def __init__(self, n=2**5, dt=0.0005, T=2.0, dim=2):
         self.name="smooth 2D"
         if dim != 2: raise ValueError("Dimension "+str(dim)+" is not supported for experiment "+self.name)
@@ -27,14 +26,9 @@ class smooth_2d:
         self.boundary = boundary
 
         # - initial conditions
-        # - define custom Expression
-        # see https://fenicsproject.discourse.group/t/problem-defining-initial-conditions-expression-problem/626
         zero_expr = Expression(("0.0","0.0"), degree=2)
         d0_expr = Expression(("sin( 2.0*pi*(cos(x[0])-sin(x[1]) ) )","cos( 2.0*pi*(cos(x[0])-sin(x[1]) ) )"), degree=2, pi = np.pi)
         self.ics = [zero_expr,Constant(0.0),d0_expr,zero_expr]
         # boundary conditions
-        # - recheck whether the conditions for d and q are correct. Generalize to not using bcs at all
-        #self.bcs = [zero_expr, Constant(0.0), d0_expr,zero_expr]
-        self.bcs = [zero_expr, Constant(0.0), None, None]
-        # - parameters namely, v_el, const_A
+        self.bcs = [zero_expr, Constant(0.0), d0_expr, zero_expr]
 
