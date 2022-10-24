@@ -1,10 +1,25 @@
 cff-version: 1.1.0
-message: "If you use this software, please cite it as below."
+title: >-
+  FEniCS implementation of a decoupled numerical
+  Finite Element scheme for the Ericksen-Leslie
+  Equations
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
 authors:
-  - family-names: Reiter
-    given-names: Maximilian
-    orcid: https://orcid.org/0000-0001-9137-7978 
-title: "FEniCS implementation of a decoupled numerical Finite Element scheme for the Ericksen-Leslie Equations equipped with the Dirichlet Energy"
-version: 1.1.0
+  - given-names: Maximilian Elias Vincenzo
+    family-names: Reiter
+    email: math@maximilianreiter.de
+    orcid: 'https://orcid.org/0000-0001-9137-7978'
+    affiliation: Technische Universität Berlin
+abstract: >-
+  FEniCS implementation of a decoupled numerical
+  Finite Element scheme for the Ericksen-Leslie
+  Equations equipped with the Dirichlet Energy.
+keywords:
+  - finite element method
+  - Ericksen-Leslie
+  - FEniCs
+date-released: '2022-10-24'
 doi: 
-date-released: 21-10-2022
