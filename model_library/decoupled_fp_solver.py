@@ -2,10 +2,6 @@
 """
 A fixpoint solver for the ericksen-leslie model which makes use of a linear formulation 
 where all three variables are decoupled.
-For this model conditional existence and conditional convergence against a dissipative solution is known. 
-Evtl. a time-step control is necessary.
-TO-DO: 
-time-step control
 """
 from fenics import *
 import numpy as np
@@ -29,7 +25,6 @@ class decoupled_fp_solver(basemodel_linear_fp_decoupled):
         [bc_v, bc_p, bc_d, bc_q] = self.bcs
 
         # setting Krylov solver and preconditioner
-        # well known settings for navier-stokes
         Ksolver = KrylovSolver("bicgstab","hypre_amg")
         Ksolver.parameters["absolute_tolerance"] = 1E-10
         Ksolver.parameters["relative_tolerance"] = 1E-9
@@ -45,16 +40,18 @@ class decoupled_fp_solver(basemodel_linear_fp_decoupled):
         # solving the director equation
         Ac = assemble(self.Lc)
         bc = assemble(self.Rc)
+        bc_d.apply(Ac, bc)
         solve(Ac, self.dl.vector(), bc, "mumps")
         
-        # solving compatibility condition - equation for the variational derivative q
+        # solving the variational derivative, here the discrete laplacian (q = - \Delta d)
         Ab = assemble(self.Lb)
         bb = assemble(self.Rb)
+        bc_q.apply(Ab,bb)
         solve(Ab,self.ql.vector(),bb, "mumps") # solver_parameters={'linear_solver': 'mumps'})
     
     def update_fp_err(self):
         """
-        using L-infty norm as fixpoint tolerance
+        the fixpoint tolerance is measured in terms of the L^2 norm wrt to the velocity and H^1 norm wrt to the director
         """
         (vl,pl)=self.ul.split(deepcopy=True)
         (vl0,pl0)=self.ul0.split(deepcopy=True)
@@ -69,30 +66,19 @@ class decoupled_fp_solver(basemodel_linear_fp_decoupled):
 
     def get_model_dependent_log(self):
         """
-        computation of metrics depending on this concrete time scheme
+        computation of energies
         """
         (vl,pl)=self.ul.split(deepcopy=True)
         kinetic_energy = assemble((vl**2)/2*dx )
         elastic_energy =  assemble((Constant(self.parameters[1])*(grad(self.dl))**2)/2*dx)
         self.energy = [ kinetic_energy + elastic_energy, kinetic_energy, elastic_energy]
         self.energy_labels = ["Total Energy", "Kinetic Energy", "Elastic Energy"]
-        # the following might be itneresting later
-        # return{"acc_err":dict(zip(["v","d","q"], accuracy_err)),  "consistency_err":dict(zip(["v","d","q"], consistency_err))  })
         return {"energy": dict(zip(self.energy_labels, self.energy))  }
        
-    def update_time_step_size(self):
-        """
-        updates the variable dt if a time step control is activated
-        the coefficient in the fixpoint iteration should only depend on time-independent factors 
-        and the gradient of the director of the preceeding iteration
-        """
-        quotient = assemble( ((grad(self.d0))**2)*dx) / assemble( ((grad(self.dl))**2)*dx)
-        self.dt = self.dt * quotient
-
 
     def create_variational_formulation(self):
         """
-        To-do: move the variable declarations for the two submodels which coincide into this method
+        choose one of the two submodels
         """
         if self.submodel == "general": 
             self.create_variational_formulation_general()
@@ -101,7 +87,6 @@ class decoupled_fp_solver(basemodel_linear_fp_decoupled):
 
     def create_variational_formulation_general(self):
         dt = Constant(self.dt)
-        # the following is fine, although its a copy since the constants dont change
         [v_el, const_A, nu, mu_1, mu_4, mu_5, mu_6, lam] = self.parameters
         
         # Define variational functions
@@ -132,8 +117,8 @@ class decoupled_fp_solver(basemodel_linear_fp_decoupled):
 
         self.init_functions = [self.u0.sub(0),self.u0.sub(1),self.d0,self.q0]
 
-        #projection 
-        self.grad_d0_project = Function(self.TensorF) #solver_parameters={'linear_solver': 'mumps'})
+        # projection 
+        self.grad_d0_project = Function(self.TensorF) 
         
         # Mass Lumping
         dxL = dx(scheme='vertex', degree=1, metadata={'representation': 'quadrature', 'degree': 1})
@@ -153,7 +138,7 @@ class decoupled_fp_solver(basemodel_linear_fp_decoupled):
 
         # Momentum equation (of navier-stokes type) - includes divergence freedom
         # this also means that this incompressible equation system is solved in a coupled way as in the navier stokes case
-        # for a coupled solver, however decoupled of the director equation and the compatibility condition
+        # for a coupled solver, however decoupled of the director equation and the discrete laplacian
         Fa =  inner( (self.vl1-self.v0) , self.a )*dx \
             + dt*inner(dot(self.v0, nabla_grad(self.vl1)), self.a)*dx + dt*0.5*div(self.v0)*inner(self.vl1, self.a)*dx \
             - dt*v_el* inner( dot(cross_mat(0.5 *(self.dl0+self.d0), 0.5 *(self.dl0+self.d0),self.dim), dot(self.grad_d0_project,self.a)) ,  self.ql0 )*dxL\
@@ -163,8 +148,9 @@ class decoupled_fp_solver(basemodel_linear_fp_decoupled):
         self.La = lhs(Fa)
         self.Ra = rhs(Fa)
 
-        # compatibility condition / equation for the variational derivative
+        # discrete Laplacian
         Fb = E*dx - inner(self.ql1,self.b)*dxL 
+
         self.Lb = lhs(Fb)
         self.Rb = rhs(Fb)
 
@@ -180,7 +166,6 @@ class decoupled_fp_solver(basemodel_linear_fp_decoupled):
         
     def create_variational_formulation_simple(self):
         dt = Constant(self.dt)
-        # the following is fine, although its a copy since the constants dont change
         [v_el, const_A, nu, mu_1, mu_4, mu_5, mu_6, lam] = self.parameters
 
         # Define variational functions
@@ -212,7 +197,7 @@ class decoupled_fp_solver(basemodel_linear_fp_decoupled):
         self.init_functions = [self.u0.sub(0),self.u0.sub(1),self.d0,self.q0]
 
         #projection
-        self.grad_d0_project = Function(self.TensorF) #solver_parameters={'linear_solver': 'mumps'})
+        self.grad_d0_project = Function(self.TensorF)
         
         # Mass Lumping
         dxL = dx(scheme='vertex', degree=1, metadata={'representation': 'quadrature', 'degree': 1})
@@ -232,7 +217,7 @@ class decoupled_fp_solver(basemodel_linear_fp_decoupled):
         self.La = lhs(Fa)
         self.Ra = rhs(Fa)
 
-        # compatibility condition / equation for the variational derivative
+        # discrete Laplacian
         Fb = E*dx - inner(self.ql1,self.b)*dxL 
         self.Lb = lhs(Fb)
         self.Rb = rhs(Fb)
