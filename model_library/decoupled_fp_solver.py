@@ -47,7 +47,7 @@ class decoupled_fp_solver(basemodel_linear_fp_decoupled):
         Ab = assemble(self.Lb)
         bb = assemble(self.Rb)
         bc_q.apply(Ab,bb)
-        solve(Ab,self.ql.vector(),bb, "mumps") # solver_parameters={'linear_solver': 'mumps'})
+        solve(Ab,self.ql.vector(),bb, "mumps") 
     
     def update_fp_err(self):
         """

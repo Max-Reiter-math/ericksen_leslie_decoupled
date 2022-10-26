@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-file that ultimately guides a model through the simulation 
+file that guides a model through the simulation 
 and starts the postprocessing
 """
 from accessories import *

@@ -10,7 +10,9 @@ import numpy as np
 import warnings
 
 def projectL(rhs ,fspace, solver_type="petsc"):
-    # mass-lumped projection
+    """
+    mass-lumped L^2-projection
+    """
     u = TrialFunction(fspace)
     res = Function(fspace)
     v = TestFunction(fspace)

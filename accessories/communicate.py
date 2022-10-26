@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-sends telegram messenges to me
+sends telegram messages to me with updates of the simulation
 get telebot by 
 pip install pyTelegramBotAPI
 """
