@@ -9,6 +9,23 @@ from fenics import *
 import numpy as np
 import warnings
 
+def projectL(rhs ,fspace, solver_type="petsc"):
+    """
+    mass-lumped L^2-projection
+    """
+    u = TrialFunction(fspace)
+    res = Function(fspace)
+    v = TestFunction(fspace)
+    # Mass Lumping
+    dxL = dx(scheme='vertex', degree=1, metadata={'representation': 'quadrature', 'degree': 1})
+    L = inner(u,v)*dxL 
+    R = inner(rhs,v)*dx
+    A = assemble(L)
+    b = assemble(R)
+    solve(A, res.vector(), b,solver_type)
+    return res
+
+
 class basemodel_linear_decoupled(basemodel):
     def __init__(self, silent=True):
         super().__init__(silent=silent)
@@ -22,17 +39,21 @@ class basemodel_linear_decoupled(basemodel):
         pass
        
     def set_ics(self, ics):
+        # interpolate expressions of initial conditions and assign them
         for i in range(len(self.init_functions)):
             assign(self.init_functions[i], interpolate(ics[i], self.init_spaces[i]))
+        # init intermediate solutions velocity + pressure
         assign(self.ul0.sub(0), self.u0.sub(0))
         assign(self.ul0.sub(1), self.u0.sub(1))   
+        # project gradient of d0
         if not self.silent: print("-- projecting d0...")
-        self.grad_d0_project.assign(project(grad(self.d0),self.TensorF, solver_type="petsc"))
-        # - for consistency also compute q0 - but necessary?
+        self.grad_d0_project.assign(projectL(grad(self.d0),self.TensorF, solver_type="petsc"))
+        # -compute q0 
         if not self.silent: print("-- computing q0...")
         Ab = assemble(self.Lb)
         bb = assemble(self.Rb)
-        solve(Ab,self.q0.vector(),bb, "mumps") # solver_parameters={'linear_solver': 'mumps'})
+        solve(Ab,self.q0.vector(),bb, "mumps") 
+        # init intermediate solutions director + discrete laplacian
         self.dl0.assign(self.d0)
         self.ql0.assign(self.q0)
 
@@ -40,13 +61,12 @@ class basemodel_linear_decoupled(basemodel):
         return self.init_functions
 
     def update_ics(self):
-        # sets the current solution as IC
-        
+        # sets the current solution as initial condition        
         assign(self.u0, self.ul)
         self.d0.assign(self.dl)
         self.q0.assign(self.ql)
-        # projection of gradient of d
-        self.grad_d0_project.assign(project(grad(self.d0),self.TensorF, solver_type="petsc"))
+        # mass-lumped projection of gradient of d
+        self.grad_d0_project.assign(projectL(grad(self.d0),self.TensorF, solver_type="petsc"))
        
     def set_bcs(self, bcs):
         self.bcs = []

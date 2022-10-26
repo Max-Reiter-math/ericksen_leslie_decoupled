@@ -29,8 +29,6 @@ class basemodel:
         self.create_variational_formulation()
         if not self.silent: print("- setting the initial conditions...")
         self.set_ics(self.exp_ics)
-
-        #the following really necessary?
         if not self.silent: print("- setting the boundary conditions...")
         self.set_bcs(self.exp_bcs)
 

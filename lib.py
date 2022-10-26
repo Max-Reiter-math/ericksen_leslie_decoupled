@@ -15,5 +15,5 @@ def get_exp_dict():
     return all_experiments
 
 def get_model_dict():
-    all_models = { "decoupled_fp_solver": decoupled_fp_solver, "decoupled_fp_solver_chorin": decoupled_fp_solver_chorin,}
+    all_models = { "decoupled_fp_solver": decoupled_fp_solver}
     return all_models

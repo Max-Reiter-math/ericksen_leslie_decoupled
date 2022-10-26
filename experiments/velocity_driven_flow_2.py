@@ -7,8 +7,7 @@ from fenics import *
 import numpy as np
 
 class velocity_driven_flow_2:
-    # as experiment one but in 2D
-    # as in Becker et. al
+
     def __init__(self, dim=3, n=2**4, dt=0.0005, T=0.5):
         self.name="velocity driven flow 2D"
         if dim in [2,3]: 
@@ -39,9 +38,9 @@ class velocity_driven_flow_2:
         # - initial conditions
         self.ics = [v_expr,Constant(0.0),d0_expr(),zero_expr]
         # boundary conditions
-        self.bcs = [v_expr, Constant(0.0), None, None]
+        self.bcs = [v_expr, Constant(0.0), d0_expr(), zero_expr]
 
-        # - parameters namely, v_el, const_A
+        
 def boundary_2d(x):
             return x[0] < (DOLFIN_EPS -0.5) or x[0] > (0.5 - DOLFIN_EPS) or x[1] < (DOLFIN_EPS -0.5) or x[1] > (0.5 - DOLFIN_EPS)
         
@@ -49,7 +48,6 @@ def boundary_3d(x):
             return x[0] < (DOLFIN_EPS -0.5) or x[0] > (0.5 - DOLFIN_EPS) or x[1] < (DOLFIN_EPS -0.5) or x[1] > (0.5 - DOLFIN_EPS) or x[2] < (DOLFIN_EPS -0.5) or x[2] > (0.5 - DOLFIN_EPS)  
         
 # - define custom Expression
-# see https://fenicsproject.discourse.group/t/problem-defining-initial-conditions-expression-problem/626
 class d0_expr_2d(UserExpression):
     def eval(self,values,x):
         eta = 0.05

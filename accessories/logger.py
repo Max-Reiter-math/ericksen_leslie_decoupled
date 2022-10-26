@@ -1,8 +1,5 @@
 """
 Logs of unstructured data, saved as a csv.
-To-Do:
-- option to save it as JSON
-- just description test for git
 """
 import pandas as pd
 import json
@@ -27,7 +24,6 @@ class log_class:
 class log:
     """
     A class which takes unstructured data, in particular nested dictionaries, and saves them as csv.
-    Big advantage: almost no formatting necessary in main file. Saves a lot of lines and makes the code stay clear.
     """
     def __init__(self, name, sort_by):
         self.name=name
