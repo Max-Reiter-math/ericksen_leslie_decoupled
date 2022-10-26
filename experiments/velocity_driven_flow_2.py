@@ -25,20 +25,20 @@ class velocity_driven_flow_2:
         if self.dim ==3:
             self.mesh = BoxMesh(Point(-0.5, -0.5,-0.5), Point(0.5, 0.5,0.5),n,n,n)
             self.boundary = boundary_3d
-            v_expr = Expression(("-20.0*x[1]","20.0*x[0]","0"), degree=2)
+            v_expr = Expression(("-10.0*x[1]","10.0*x[0]","0"), degree=2)
             zero_expr = Expression(("0.0","0.0","0"), degree=2)
             d0_expr = d0_expr_3d
         else:
             self.mesh = RectangleMesh(Point(-0.5,-0.5),Point(0.5,0.5),n,n)
             self.boundary = boundary_2d
-            v_expr = Expression(("-20.0*x[1]","20.0*x[0]"), degree=1)
+            v_expr = Expression(("-10.0*x[1]","10.0*x[0]"), degree=1)
             zero_expr = Expression(("0.0","0.0"), degree=2)
             d0_expr = d0_expr_2d
 
         # - initial conditions
         self.ics = [v_expr,Constant(0.0),d0_expr(),zero_expr]
         # boundary conditions
-        self.bcs = [zero_expr, Constant(0.0), d0_expr(), zero_expr]
+        self.bcs = [v_expr, Constant(0.0), d0_expr(), zero_expr]
 
         
 def boundary_2d(x):
