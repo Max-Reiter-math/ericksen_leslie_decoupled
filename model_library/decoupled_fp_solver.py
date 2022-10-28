@@ -68,9 +68,10 @@ class decoupled_fp_solver(basemodel_linear_fp_decoupled):
         """
         computation of energies
         """
+        [v_el, const_A, nu, mu_1, mu_4, mu_5, mu_6, lam] = self.parameters
         (vl,pl)=self.ul.split(deepcopy=True)
-        kinetic_energy = assemble((vl**2)/2*dx )
-        elastic_energy =  assemble((Constant(self.parameters[1])*(grad(self.dl))**2)/2*dx)
+        kinetic_energy = 0.5*assemble((vl**2)/2*dx )
+        elastic_energy =  const_A*0.5*assemble((Constant(self.parameters[1])*(grad(self.dl))**2)/2*dx)
         self.energy = [ kinetic_energy + elastic_energy, kinetic_energy, elastic_energy]
         self.energy_labels = ["Total Energy", "Kinetic Energy", "Elastic Energy"]
         return {"energy": dict(zip(self.energy_labels, self.energy))  }
@@ -132,9 +133,9 @@ class decoupled_fp_solver(basemodel_linear_fp_decoupled):
         # Leslie stress tensor
         T_L = dt*v_el*Constant(mu_1+lam**2)*inner(inner(0.5 *(self.dl0+self.d0),dot(grad_sym(self.vl1),0.5 *(self.dl0+self.d0))),inner(0.5 *(self.dl0+self.d0),dot(grad_sym(self.a),0.5 *(self.dl0+self.d0))))*dx\
                 + dt*Constant(mu_4)*inner( grad_sym(self.vl1), grad_sym(self.a))*dx \
-                + dt*v_el* Constant(mu_5+mu_6-lam**2)*inner( dot(grad_sym(self.vl1),self.dl0), dot(grad_sym(self.a),self.dl0))*dx \
-                - dt*Constant(lam)*inner(dot( I_dd0 , self.ql0), dot(grad_sym(self.a),0.5 *(self.dl0+self.d0)))*dxL \
-                - dt*inner(dot(grad_skw(self.a),self.ql0),0.5 *(self.dl0+self.d0))*dxL 
+                + v_el*dt* Constant(mu_5+mu_6-lam**2)*inner( dot(grad_sym(self.vl1),self.dl0), dot(grad_sym(self.a),self.dl0))*dx \
+                - v_el*dt*Constant(lam)*inner(dot( I_dd0 , self.ql0), dot(grad_sym(self.a),0.5 *(self.dl0+self.d0)))*dxL \
+                - v_el*dt*inner(dot(grad_skw(self.a),self.ql0),0.5 *(self.dl0+self.d0))*dxL 
 
         # Momentum equation (of navier-stokes type) - includes divergence freedom
         # this also means that this incompressible equation system is solved in a coupled way as in the navier stokes case
@@ -156,10 +157,10 @@ class decoupled_fp_solver(basemodel_linear_fp_decoupled):
 
         # director equation
         Fc = inner((self.dl1-self.d0), self.c)*dxL \
-            + dt*v_el* inner( dot(cross_mat(0.5 *(self.dl0+self.d0), 0.5 *(self.dl0+self.d0),self.dim), dot(self.grad_d0_project,self.vl0)) ,  self.c )*dxL \
+            + v_el*dt* inner( dot(cross_mat(0.5 *(self.dl0+self.d0), 0.5 *(self.dl0+self.d0),self.dim), dot(self.grad_d0_project,self.vl0)) ,  self.c )*dxL \
             + dt*inner(dot(cross_mat(0.5 *(self.dl1+self.d0), 0.5 *(self.dl0+self.d0),self.dim), self.ql0), self.c)*dxL \
-            + dt*v_el*Constant(lam)*inner(self.c,dot(cross_mat(0.5 *(self.dl1+self.d0), 0.5 *(self.dl0+self.d0),self.dim), dot(grad_sym(self.vl0),0.5 *(self.dl0+self.d0))))*dxL \
-            - dt*v_el*inner(dot(grad_skw(self.vl0),0.5 *(self.dl1+self.d0)),self.c)*dxL 
+            + v_el*dt*Constant(lam)*inner(self.c,dot(cross_mat(0.5 *(self.dl1+self.d0), 0.5 *(self.dl0+self.d0),self.dim), dot(grad_sym(self.vl0),0.5 *(self.dl0+self.d0))))*dxL \
+            - v_el*dt*inner(dot(grad_skw(self.vl0),0.5 *(self.dl1+self.d0)),self.c)*dxL 
 
         self.Lc = lhs(Fc)
         self.Rc = rhs(Fc)
