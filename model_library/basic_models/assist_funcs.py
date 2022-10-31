@@ -25,23 +25,7 @@ def cross_mat(d0, d1, dim):
         D = as_matrix( [ [1.0 , 0.0] , [0.0 , 0.0]] )
         Sinv = as_matrix( [ [d0[1] , -d0[0]] , [d0[0] , d0[1]]] )
         return (S*D*Sinv)
-        #return as_matrix( [ [1.0 , 0.0] , [0.0 , 1.0]] )
     if dim ==3:
         I= as_matrix( [ [1.0 ,0.0 , 0.0],  [0.0 , 1.0, 0.0] , [0.0 , 0.0, 1.0]] )
         return (I - outer(d1,d0))
-
-def normalize_func(w, dim, epsilon=0.01):                                                                                                                                                        
-    """
-    projects function onto unit sphere
-    """                                                                                                                     
-    wv = w.vector()[:]                                                                                                                                                     
-    wa = np.reshape(wv, (-1, dim))    
-    norms = np.linalg.norm(wa, axis=1, keepdims=True)     
-    if(np.max(np.abs(norms-1.)) > epsilon):                                                                                                                                         
-        wa = wa/norms                                                                                                                                                               
-        for i in range(dim):                                                                                                                                                        
-            wv[i::dim] = wa[:, i]                                                                                                                                                   
-        w.vector().set_local(wv)                                                                                                                                                    
-        w.vector().apply('')                                                                                                                                                        
-    return w  
 

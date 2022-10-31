@@ -1,7 +1,5 @@
 """
 postprocessing class for FEM functions
-To-Do:
-- optional 3d Graphs
 """
 from fenics import *
 from .my_plots import sliced_quiver, quiver_2d, energy_plot
