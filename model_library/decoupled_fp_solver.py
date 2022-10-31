@@ -70,8 +70,8 @@ class decoupled_fp_solver(basemodel_linear_fp_decoupled):
         """
         [v_el, const_A, nu, mu_1, mu_4, mu_5, mu_6, lam] = self.parameters
         (vl,pl)=self.ul.split(deepcopy=True)
-        kinetic_energy = 0.5*assemble((vl**2)/2*dx )
-        elastic_energy =  const_A*0.5*assemble((Constant(self.parameters[1])*(grad(self.dl))**2)/2*dx)
+        kinetic_energy = 0.5*assemble((vl**2)*dx )
+        elastic_energy =  const_A*0.5*assemble(((grad(self.dl))**2)*dx)
         self.energy = [ kinetic_energy + elastic_energy, kinetic_energy, elastic_energy]
         self.energy_labels = ["Total Energy", "Kinetic Energy", "Elastic Energy"]
         return {"energy": dict(zip(self.energy_labels, self.energy))  }
